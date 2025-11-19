@@ -1,70 +1,185 @@
-# Getting Started with Create React App
+# 電子簽章系統
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+一個基於 Next.js 和 MySQL 的完整電子簽章解決方案，支援多人簽署、審計追蹤和安全認證。
 
-## Available Scripts
+## 功能特點
 
-In the project directory, you can run:
+### 核心功能
+-  **用戶管理**：註冊、登入、JWT 認證
+-  **文件管理**：創建、查看、追蹤文件狀態
+-  **電子簽章**：使用 Signature Pad 進行手寫簽名
+-  **多人簽署**：支援多個簽署者按順序簽署
+-  **審計日誌**：完整記錄所有操作（時間、IP、設備）
+-  **狀態追蹤**：草稿、待簽署、已完成、已拒絕
 
-### `npm start`
+### 技術棧
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+**前端**
+- Next.js 14 (App Router)
+- React 18
+- TypeScript
+- Tailwind CSS
+- Signature Pad
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+**後端**
+- Next.js API Routes
+- MySQL 8.0+
+- JWT 認證
+- bcryptjs 密碼加密
 
-### `npm test`
+## 安裝步驟
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 1. 環境需求
+- Node.js 18+
+- MySQL 8.0+
+- npm 或 yarn
 
-### `npm run build`
+### 2. 克隆專案並安裝依賴
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+cd e-signature-app
+npm install
+```
+## 使用指南
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 註冊和登入
+1. 首次訪問會看到登入頁面
+2. 點擊「還沒有帳戶？立即註冊」創建新帳戶
+3. 填寫用戶名、電子郵件和密碼（至少 6 個字符）
+4. 註冊後自動登入並跳轉到儀表板
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 創建文件
+1. 在儀表板點擊「創建新文件」
+2. 填寫文件標題和描述
+3. 添加需要簽署的用戶電子郵件
+4. 提交後文件狀態為「待簽署」
 
-### `npm run eject`
+### 簽署文件
+1. 點擊文件卡片進入詳情頁
+2. 如果您是簽署者且尚未簽署，會看到「立即簽署」按鈕
+3. 點擊後彈出簽名板
+4. 用滑鼠或觸控筆在白色區域簽名
+5. 確認簽署後，簽名會被保存並記錄時間、IP
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 追蹤進度
+- 儀表板顯示所有相關文件
+- 每個文件卡片顯示簽署進度（如 2/3 已簽署）
+- 文件詳情頁顯示：
+  - 所有簽署者及其狀態
+  - 已完成的簽章記錄
+  - 完整的活動日誌
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 數據庫架構
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 主要數據表
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+**users** - 用戶表
+- 存儲用戶基本資訊
+- 密碼使用 bcrypt 加密
 
-## Learn More
+**documents** - 文件表
+- 存儲文件元數據
+- 追蹤文件狀態
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+**signatures** - 簽章表
+- 存儲簽章圖片（Base64）
+- 記錄簽署時間、IP、設備資訊
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+**document_signers** - 簽署者表
+- 追蹤誰需要簽署
+- 記錄簽署順序和狀態
 
-### Code Splitting
+**audit_logs** - 審計日誌表
+- 記錄所有操作
+- 用於合規性和追蹤
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## API 端點
 
-### Analyzing the Bundle Size
+### 認證
+- `POST /api/auth/register` - 用戶註冊
+- `POST /api/auth/login` - 用戶登入
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 文件
+- `GET /api/documents` - 獲取文件列表
+- `POST /api/documents` - 創建新文件
+- `GET /api/documents/[id]` - 獲取文件詳情
+- `POST /api/documents/[id]` - 簽署文件
 
-### Making a Progressive Web App
+## 安全特性
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+1. **密碼安全**：使用 bcryptjs 加密，強度 10
+2. **JWT 認證**：所有 API 都需要有效 token
+3. **審計追蹤**：記錄 IP 地址和 User Agent
+4. **權限控制**：只有被授權的用戶才能簽署
+5. **防重複簽署**：已簽署的用戶無法再次簽署
 
-### Advanced Configuration
+## 生產環境部署
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### 1. 構建應用
+```bash
+npm run build
+```
 
-### Deployment
+### 2. 啟動生產服務器
+```bash
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### 3. 使用 PM2（推薦）
+```bash
+npm install -g pm2
+pm2 start npm --name "e-signature-app" -- start
+pm2 save
+pm2 startup
+```
 
-### `npm run build` fails to minify
+### 4. 環境變量
+確保在生產環境設置：
+- 強密碼的 `JWT_SECRET`
+- 正確的數據庫配置
+- 考慮使用環境變量管理服務
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 優化建議
+
+### 性能優化
+- 使用 Redis 緩存 session
+- 添加 CDN 加速靜態資源
+- 數據庫索引優化
+
+### 安全加固
+- 實施 rate limiting
+- 添加 CAPTCHA
+- 啟用 HTTPS
+- 實施 CORS 策略
+
+### 功能擴展
+- 文件上傳和預覽
+- 電子郵件通知
+- 手機簡訊驗證
+- PDF 導出功能
+- 多語言支援
+
+## 故障排除
+
+### 數據庫連接錯誤
+- 確認 MySQL 服務正在運行
+- 檢查 `.env.local` 配置是否正確
+- 驗證數據庫用戶權限
+
+### 無法簽署
+- 確認用戶已被添加為簽署者
+- 檢查簽署者狀態是否為 "pending"
+- 確認 token 未過期
+
+### 頁面載入緩慢
+- 檢查數據庫查詢效率
+- 考慮添加索引
+- 使用數據分頁
+
+## 授權
+
+MIT License
+
+## 聯絡方式
+
+如有問題或建議，歡迎提交 Issue。
